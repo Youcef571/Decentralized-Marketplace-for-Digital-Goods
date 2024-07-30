@@ -1,0 +1,28 @@
+pragma solidity ^0.8.0;
+
+contract Marketplace {
+    struct Item {
+        uint id;
+        address seller;
+        string name;
+        uint price;
+        address buyer;
+    }
+
+    mapping(uint => Item) public items;
+    uint public itemCount;
+
+    function listItem(string memory _name, uint _price) public {
+        itemCount++;
+        items[itemCount] = Item(itemCount, msg.sender, _name, _price, address(0));
+    }
+
+    function buyItem(uint _itemId) public payable {
+        Item storage item = items[_itemId];
+        require(item.price == msg.value, "Incorrect value sent.");
+        require(item.buyer == address(0), "Item already sold.");
+
+        item.buyer = msg.sender;
+        payable(item.seller).transfer(msg.value);
+    }
+}
